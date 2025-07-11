@@ -21,9 +21,14 @@ function startDownload() {
   const quality  = document.getElementById('qualitySelect').value;
   const msg      = document.getElementById('message');
 
-  if (!url) { msg.textContent = '⚠️ Enter a URL first'; msg.style.color = '#ffcc00'; return; }
+  if (!url) {
+    msg.textContent = '⚠️ Enter a URL first';
+    msg.style.color = '#ffcc00';
+    return;
+  }
 
-  msg.textContent = '⏳ Preparing your download…'; msg.style.color = '#00ffff';
+  msg.textContent = '⏳ Preparing your download…';
+  msg.style.color = '#00ffff';
 
   fetch('/download', {
     method : 'POST',
@@ -47,5 +52,8 @@ function startDownload() {
       msg.textContent = '✅ Download started!';
       msg.style.color = '#00ff99';
   })
-  .catch(err => { msg.textContent = '❌ ' + err.message; msg.style.color = '#ff3333'; });
+  .catch(err => {
+      msg.textContent = '❌ ' + err.message;
+      msg.style.color = '#ff3333';
+  });
 }

@@ -1,58 +1,51 @@
 function updatePreview() {
-  const url = document.getElementById("videoURL").value;
-  const frame = document.getElementById("previewFrame");
-
-  const videoId = extractVideoId(url);
-  if (videoId) {
-    frame.style.display = "block";
-    frame.src = `https://www.youtube.com/embed/${videoId}`;
+  const url = document.getElementById('videoURL').value;
+  const frame = document.getElementById('previewFrame');
+  const id = extractVideoId(url);
+  if (id) {
+    frame.style.display = 'block';
+    frame.src = `https://www.youtube.com/embed/${id}`;
   } else {
-    frame.style.display = "none";
-    frame.src = "";
+    frame.style.display = 'none';
+    frame.src = '';
   }
 }
 
 function extractVideoId(url) {
-  const regExp = /(?:v=|\/)([0-9A-Za-z_-]{11})/;
-  const match = url.match(regExp);
-  return match ? match[1] : null;
+  const m = url.match(/(?:v=|\\/)([0-9A-Za-z_-]{11})/);
+  return m ? m[1] : null;
 }
 
 function startDownload() {
-  const url = document.getElementById("videoURL").value;
-  const quality = document.getElementById("qualitySelect").value;
-  const msg = document.getElementById("message");
+  const url      = document.getElementById('videoURL').value.trim();
+  const quality  = document.getElementById('qualitySelect').value;
+  const msg      = document.getElementById('message');
 
-  if (!url) {
-    msg.innerText = "⚠️ Please enter a YouTube video URL!";
-    msg.style.color = "#ffcc00";
-    return;
-  }
+  if (!url) { msg.textContent = '⚠️ Enter a URL first'; msg.style.color = '#ffcc00'; return; }
 
-  msg.innerText = "⏳ Preparing your download...";
-  msg.style.color = "#00ffff";
+  msg.textContent = '⏳ Preparing your download…'; msg.style.color = '#00ffff';
 
-  fetch("/download", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url: url, format: quality })
+  fetch('/download', {
+    method : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body   : JSON.stringify({ url, format: quality })
   })
-  .then(response => {
-    if (!response.ok) throw new Error("Download failed");
-    return response.blob();
-  })
+  .then(r => { if (!r.ok) throw new Error('Server error'); return r.blob(); })
   .then(blob => {
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "video.mp4";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    msg.innerText = "✅ Download started!";
-    msg.style.color = "#00ff99";
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = 'video.mp4';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+
+      requestAnimationFrame(() => {
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(blobUrl); a.remove(); }, 1500);
+      });
+
+      msg.textContent = '✅ Download started!';
+      msg.style.color = '#00ff99';
   })
-  .catch(error => {
-    msg.innerText = "❌ Download failed: " + error.message;
-    msg.style.color = "#ff3333";
-  });
+  .catch(err => { msg.textContent = '❌ ' + err.message; msg.style.color = '#ff3333'; });
 }

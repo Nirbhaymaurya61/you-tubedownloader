@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YouTube Downloader</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f0f0f, #1c1c2b);
+      color: #ffffff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    section {
+      max-width: 800px;
+      margin: 80px auto;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 20px;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: #ff416c;
+    }
+
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 25px;
+      color: #aaa;
+    }
+
+    input[type="text"] {
+      width: 80%;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      outline: none;
+      background-color: #222;
+      color: white;
+    }
+
+    select {
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: none;
+      background-color: #444;
+      color: white;
+      margin-top: 10px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 30px;
+      font-size: 1rem;
+      background: linear-gradient(45deg, #ff416c, #ff4b2b);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #ff416c;
+    }
+
+    iframe {
+      margin-top: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .animation-text {
+      margin-top: 20px;
+      font-size: 1rem;
+      color: #00ffcc;
+      opacity: 0;
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section>
+    <h1>YOUTUBE VIDEO DOWNLOADER</h1>
+    <p>Download your favorite videos in high quality</p>
+
+    <input type="text" id="videoURL" placeholder="Enter YouTube Video URL..." oninput="updatePreview()" />
+    <br />
+
+
+     <div id="Top">
+      <select id="qualitySelect">
+      <option value="bestvideo+bestaudio/best">Auto (Best) </option>
+      <option value="22">720p</option>
+      <option value="18">360p</option>
+      <option value="251">Audio Only</option>
+    </select>
+    </div>
+
+    <br />
+    <button onclick="startDownload()">Download Video</button>
+
+    <iframe id="previewFrame" width="560" height="315" style="display: none;" frameborder="0" allowfullscreen></iframe>
+
+    <div id="message" class="animation-text"></div>
+  </section>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

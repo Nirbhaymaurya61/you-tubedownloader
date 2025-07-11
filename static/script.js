@@ -1,7 +1,13 @@
+// ===============================
+//  script.js  (fully replaceable)
+// ===============================
+// Works on desktop + Android (Chrome, Samsung Internet, Firefox)
+
 function updatePreview() {
-  const url = document.getElementById('videoURL').value;
+  const url   = document.getElementById('videoURL').value.trim();
   const frame = document.getElementById('previewFrame');
-  const id = extractVideoId(url);
+  const id    = extractVideoId(url);
+
   if (id) {
     frame.style.display = 'block';
     frame.src = `https://www.youtube.com/embed/${id}`;
@@ -11,49 +17,67 @@ function updatePreview() {
   }
 }
 
+/**
+ * Extract the 11‑character YouTube ID from any standard URL.
+ */
 function extractVideoId(url) {
-  const m = url.match(/(?:v=|\\/)([0-9A-Za-z_-]{11})/);
-  return m ? m[1] : null;
+  const match = url.match(/(?:v=|[\\/])([0-9A-Za-z_-]{11})(?:[?&#]|$)/);
+  return match ? match[1] : null;
 }
 
+/**
+ * POST the URL + format to the Flask backend and trigger a download.
+ */
 function startDownload() {
-  const url      = document.getElementById('videoURL').value.trim();
-  const quality  = document.getElementById('qualitySelect').value;
-  const msg      = document.getElementById('message');
+  const url     = document.getElementById('videoURL').value.trim();
+  const quality = document.getElementById('qualitySelect').value;
+  const msg     = document.getElementById('message');
 
   if (!url) {
-    msg.textContent = '⚠️ Enter a URL first';
-    msg.style.color = '#ffcc00';
+    showMessage('⚠️ Please enter a YouTube URL first', '#ffcc00');
     return;
   }
 
-  msg.textContent = '⏳ Preparing your download…';
-  msg.style.color = '#00ffff';
+  showMessage('⏳ Preparing your download…', '#00ffff');
 
   fetch('/download', {
     method : 'POST',
     headers: { 'Content-Type': 'application/json' },
     body   : JSON.stringify({ url, format: quality })
   })
-  .then(r => { if (!r.ok) throw new Error('Server error'); return r.blob(); })
-  .then(blob => {
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = 'video.mp4';
-      a.style.display = 'none';
-      document.body.appendChild(a);
-
-      requestAnimationFrame(() => {
-        a.click();
-        setTimeout(() => { URL.revokeObjectURL(blobUrl); a.remove(); }, 1500);
-      });
-
-      msg.textContent = '✅ Download started!';
-      msg.style.color = '#00ff99';
+  .then(res => {
+    if (!res.ok) throw new Error('Server error');
+    return res.blob();
   })
-  .catch(err => {
-      msg.textContent = '❌ ' + err.message;
-      msg.style.color = '#ff3333';
+  .then(blob => triggerMobileFriendlyDownload(blob))
+  .catch(err => showMessage('❌ Download failed: ' + err.message, '#ff3333'));
+}
+
+/**
+ * Show status text on the page.
+ */
+function showMessage(text, color) {
+  const msg = document.getElementById('message');
+  msg.textContent = text;
+  msg.style.color = color;
+}
+
+
+function triggerMobileFriendlyDownload(blob) {
+  const blobUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = blobUrl;
+  a.download = 'video.mp4';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+
+  requestAnimationFrame(() => {
+    a.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(blobUrl);
+      a.remove();
+    }, 1500);
   });
+
+  showMessage('✅ Download started!', '#00ff99');
 }
